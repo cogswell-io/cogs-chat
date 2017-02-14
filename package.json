@@ -1,0 +1,37 @@
+{
+  "name": "cogs-chat",
+  "version": "1.0.0",
+  "description": "CLI chat client based on Cogswell Pub/Sub",
+  "main": "chat.js",
+  "scripts": {
+    "start": "node chat.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cogswell-io/cogs-chat.git"
+  },
+  "keywords": [
+    "chat",
+    "pub/sub",
+    "pubsub",
+    "publish",
+    "subscribe",
+    "cogswell",
+    "cogs"
+  ],
+  "author": "Aviata, Inc.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cogswell-io/cogs-chat/issues"
+  },
+  "homepage": "https://github.com/cogswell-io/cogs-chat#readme",
+  "dependencies": {
+    "blessed": "^0.1.81",
+    "bluebird": "^3.4.7",
+    "cogs-sdk": "^4.6.1",
+    "durations": "^3.0.0",
+    "lodash": "^4.17.4",
+    "moment": "^2.17.1"
+  }
+}
