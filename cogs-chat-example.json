@@ -3,7 +3,7 @@
     "R-dead-beef",
     "W-dead-beef"
   ],
-  "options": [
+  "options": {
     "url": "http://my.proxy.example:8080"
-  ]
+  }
 }

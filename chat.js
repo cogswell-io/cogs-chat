@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const P = require('bluebird');
 const cogs = require('cogs-sdk');
 const moment = require('moment');
@@ -27,6 +28,9 @@ function getConfig() {
 }
 
 function chat(handle) {
+  console.log(`Socket connection established.`);
+  handle.on('close', () => console.log(`Socket closed.`));
+  handle.close();
   // Do your magic here, dude.
 }
 
