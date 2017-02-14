@@ -1,0 +1,9 @@
+{
+  "keys": [
+    "R-dead-beef",
+    "W-dead-beef"
+  ],
+  "options": [
+    "url": "http://my.proxy.example:8080"
+  ]
+}
