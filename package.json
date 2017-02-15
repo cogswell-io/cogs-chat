@@ -7,6 +7,9 @@
     "start": "node chat.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "bin": {
+    "cogs-chat": "chat.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cogswell-io/cogs-chat.git"
