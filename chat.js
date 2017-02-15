@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const _ = require('lodash');
 const P = require('bluebird');
 const cogs = require('cogs-sdk');

@@ -8,7 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-    "cogs-chat": "chat.js"
+    "cogs-chat": "./chat.js"
   },
   "repository": {
     "type": "git",
