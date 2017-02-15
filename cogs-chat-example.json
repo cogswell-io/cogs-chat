@@ -4,6 +4,6 @@
     "W-dead-beef"
   ],
   "options": {
-    "url": "http://my.proxy.example:8080"
+    "url": "ws://my.proxy.example:8080"
   }
 }

@@ -6,6 +6,8 @@ const blessed = require('blessed');
 const durations = require('durations');
 const readline = require('readline');
 
+const EventEmitter = require('events');
+
 const fs = require('fs');
 const readFile = P.promisify(fs.readFile);
 
@@ -28,62 +30,157 @@ function getConfig() {
   return config;
 }
 
-function readInput(inputHandler) {
-  // For each line of input, call inputHandler
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
+function ui(chatter) {
+  const screen = blessed.screen({
+    smartCSR: true,
+    dockBorders: true,
   });
 
-  function prompt() {
-    rl.question('> ', answer => {
-      inputHandler(answer);
-      prompt();
-    });
-  }
+  let inputHeight = 6;
+  let buttonWidth = 12;
+  let inputWidth = screen.width - buttonWidth;
+  let firstHeight = screen.height - inputHeight;
 
-  prompt();
+  let container = blessed.box({
+    parent: screen,
+    ignoreLocked: ['C-c'],
+  });
+
+  let log = blessed.box({
+    parent: container,
+    top: 0,
+    left: 0,
+    right: 0,
+    height: firstHeight,
+    width: '100%',
+    border: {
+      type: 'line',
+      fg: '#00ff00',
+    },
+    scrollable: true,
+    scrollbar: {
+      bg: 'blue',
+    },
+    mouse: true,
+  });
+
+  let input = blessed.Textbox({
+    parent: container,
+    left: 0,
+    bottom: 0,
+    height: inputHeight,
+    width: inputWidth,
+    border: {
+      type: 'line',
+      fg: '#ff0000',
+    },
+    scrollable: true,
+    scrollbar: {
+      bg: 'blue',
+    },
+    mouse: true,
+    inputOnFocus: true,
+    keys: true,
+  });
+
+  let button = blessed.Button({
+    parent: container,
+    right: 0,
+    bottom: 0,
+    height: inputHeight,
+    width: buttonWidth,
+    border: {
+      type: 'line',
+      fg: '#0000ff',
+    },
+  });
+
+  button.on('click', () => input.submit());
+
+  screen.key(['escape', 'q', 'C-c'], function(ch, key) {
+    return process.exit(0);
+  });
+
+  input.on('submit', text => {
+    chatter.emit('publish', text);
+  });
+
+  chatter.on('message', mesage => {
+    log.insertBottom(`[${moment().toISOString()}] ${mesage}`);
+    input.clearValue();
+    input.focus();
+    screen.render();
+  });
+
+  input.focus();
+  screen.render();
 }
 
-function chat(handle, username) {
+function chat(handle, username, channel) {
+  const chatter = new EventEmitter();
 
   const messageHandler = ({message, timestamp}) => {
-    console.log(`[${moment(timestamp).toISOString()}] ${message}`);
-    //do things with message received
+    chatter.emit('message', `[${moment(timestamp).toISOString()}] ${message}`);
   };
 
   const publish = message => {
-    handle.publishWithAck('channel', `${username} > ${message}`)
+    handle.publishWithAck(channel, `${username} > ${message}`)
       .catch(error => console.error(`Failed to publish message:`, error));
   };
 
-  handle.subscribe('channel', messageHandler)
-    .then(subscribedChannels => {
-      console.log(`Subscribed to channels: ${subscribedChannels}`); //In this case would output ['channel']
-      publish("Hey everybody. I'm here. Party can start.");
-      publish("Testing A");
-      publish("Testing B");
-      publish("Testing C");
-      publish("Testing D");
-      publish("Testing E");
+  handle.subscribe(channel, messageHandler)
+  .then(subscribedChannels => {
+    publish("Hey everybody. I'm here. Party can start.");
+  });
+
+  chatter.on('publish', publish);
+  chatter.on('close', () => handle.close());
+
+  return chatter;
+}
+
+/*
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+*/
+
+function getUsername() {
+  return new P(resolve => {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
     });
 
-  readInput(publish);
+    rl.question('Enter your name> ', username => {
+      rl.close();
+      resolve(username);
+    });
+  });
+}
 
-  console.log(`Socket connection established.`);
-  handle.on('close', () => console.log(`Socket closed.`));
+function getChannel() {
+  return new P(resolve => {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
 
-  const quitHandler = () => {
-    handle.close();
-  };
-  // Do your magic here, dude.
-  var cogs = require("cogs-sdk")
+    rl.question('Enter the channel> ', channel => {
+      rl.close();
+      resolve(channel);
+    });
+  });
 }
 
 function run() {
   getConfig()
   .then(({keys, options}) => cogs.pubsub.connect(keys, options))
-  .then(handle => chat(handle, 'Alberto'))
+  .then((handle) => ui(chat(handle, 'Guest', 'chatter')))
+  //.then(handle => getUsername().then(user => ({handle, user})))
+  //.then(({handle, user}) => getChannel().then(chan => ({handle, user, chan})))
+  //.then(({handle, user, chan}) => ui(chat(handle, user, chan)))
   .catch(error => console.error(`Error setting up chat client:`, error));
 }
 
