@@ -1,6 +1,6 @@
 {
   "name": "cogs-chat",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "CLI chat client based on Cogswell Pub/Sub",
   "main": "chat.js",
   "scripts": {
