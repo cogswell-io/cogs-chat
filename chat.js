@@ -125,7 +125,7 @@ function chat(handle, username, channel) {
   };
 
   const publish = message => {
-    handle.publishWithAck(channel, `${username} > ${message}`)
+    handle.publishWithAck(channel, `${username}: ${message}`)
       .catch(error => console.error(`Failed to publish message:`, error));
   };
 
