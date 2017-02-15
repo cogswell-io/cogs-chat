@@ -5,8 +5,9 @@ const P = require('bluebird');
 const cogs = require('cogs-sdk');
 const moment = require('moment');
 const blessed = require('blessed');
-const durations = require('durations');
+const program = require('commander');
 const readline = require('readline');
+const durations = require('durations');
 
 const EventEmitter = require('events');
 
@@ -17,10 +18,15 @@ function coalesce() {
   return _(arguments).filter(arg => !_.isNil(arg)).first();
 }
 
-let configFile = coalesce(process.env.COGS_CHAT_CONFIG_FILE, "cogs-chat.json");
 let config;
-function getConfig() {
+function getConfig(configLocation) {
   if (!config) {
+    let configFile = coalesce(
+      configLocation,
+      process.env.COGS_CHAT_CONFIG_FILE,
+      "cogs-chat.json"
+    );
+
     config = readFile(configFile)
       .then(raw => JSON.parse(raw))
       .catch(error => {
@@ -171,15 +177,22 @@ function getChannel() {
 }
 
 function run() {
-  if (process.argv.length != 4) {
+  program
+  .option('-c, --config-file [CONFIG_FILE]',
+          'Specify the location of the config file.')
+  .parse(process.argv);
+
+  console.log("args:", program.args);
+
+  if (program.args.length != 2) {
     console.log('usage: chat <username> <channel>');
     process.exit(0);
   }
 
-  const user = process.argv[2];
-  const chan = process.argv[3];
+  const user = program.args[0];
+  const chan = program.args[1];
 
-  getConfig()
+  getConfig(program.configFile)
   .then(({keys, options}) => cogs.pubsub.connect(keys, options))
   .then((handle) => ui(chat(handle, user, chan)))
   //.then(handle => getUsername().then(user => ({handle, user})))
