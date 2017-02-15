@@ -105,8 +105,9 @@ function ui(chatter) {
     chatter.emit('publish', text);
   });
 
-  chatter.on('message', mesage => {
-    log.insertBottom(`[${moment().toISOString()}] ${mesage}`);
+  chatter.on('message', message => {
+    log.insertBottom(message);
+    log.setScrollPerc(100);
     input.clearValue();
     input.focus();
     screen.render();
@@ -139,13 +140,6 @@ function chat(handle, username, channel) {
   return chatter;
 }
 
-/*
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
-*/
-
 function getUsername() {
   return new P(resolve => {
     const rl = readline.createInterface({
@@ -175,9 +169,17 @@ function getChannel() {
 }
 
 function run() {
+  if (process.argv.length != 4) {
+    console.log('usage: chat <username> <channel>');
+    process.exit(0);
+  }
+
+  const user = process.argv[2];
+  const chan = process.argv[3];
+
   getConfig()
   .then(({keys, options}) => cogs.pubsub.connect(keys, options))
-  .then((handle) => ui(chat(handle, 'Guest', 'chatter')))
+  .then((handle) => ui(chat(handle, user, chan)))
   //.then(handle => getUsername().then(user => ({handle, user})))
   //.then(({handle, user}) => getChannel().then(chan => ({handle, user, chan})))
   //.then(({handle, user, chan}) => ui(chat(handle, user, chan)))
