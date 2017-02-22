@@ -182,8 +182,6 @@ function run() {
           'Specify the location of the config file.')
   .parse(process.argv);
 
-  console.log("args:", program.args);
-
   if (program.args.length != 2) {
     console.log('usage: chat <username> <channel>');
     process.exit(0);
